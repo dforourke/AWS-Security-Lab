@@ -1,0 +1,264 @@
+# System Security Plan — Sample
+## AWS Security Lab
+
+> **Note:** This is a sample SSP produced as part of a personal cloud security lab project. It is modeled after NIST SP 800-18 and DoD RMF SSP requirements to demonstrate practical familiarity with ATO documentation. It is not associated with any real system or authorization boundary.
+
+---
+
+## Table of Contents
+
+1. System Identification
+2. System Categorization
+3. System Owner and Contacts
+4. System Description
+5. System Environment and Architecture
+6. System Interconnections
+7. Laws, Regulations, and Policies
+8. Security Control Implementation Summary
+9. Minimum Security Controls
+10. POA&M Summary
+
+---
+
+## 1. System Identification
+
+| Field | Value |
+|-------|-------|
+| System Name | AWS Security Lab |
+| System Abbreviation | ASL |
+| System Identifier | LAB-001 |
+| System Type | Major Application |
+| Operational Status | Development / Lab |
+| Environment | Amazon Web Services (AWS), us-east-1 |
+| Authorization Boundary | AWS account boundary; all resources within the defined VPC |
+
+---
+
+## 2. System Categorization
+
+Security categorization is performed in accordance with FIPS 199 and NIST SP 800-60.
+
+| Information Type | Confidentiality | Integrity | Availability |
+|-----------------|-----------------|-----------|--------------|
+| System Configuration Data | Moderate | Moderate | Low |
+| Audit and Accountability Data | Moderate | High | Moderate |
+| System Operational Data | Low | Moderate | Low |
+
+**Overall System Categorization: Moderate**
+
+> The system is categorized as **MODERATE** based on the high-water mark across all information types. This categorization drives the baseline control selection in accordance with NIST SP 800-53 Moderate baseline requirements.
+
+---
+
+## 3. System Owner and Contacts
+
+| Role | Name | Contact |
+|------|------|---------|
+| System Owner | Daniel O'Rourke | dforourke@pm.me |
+| Information System Security Officer (ISSO) | Daniel O'Rourke | dforourke@pm.me |
+| Authorizing Official (AO) | N/A — Lab Environment | — |
+
+---
+
+## 4. System Description
+
+### 4.1 Purpose and Function
+
+The AWS Security Lab is a personally developed cloud security environment designed to demonstrate practical implementation of NIST 800-53 security controls in an AWS cloud infrastructure. The system provides a realistic representation of a secured cloud environment aligned to DoD/Federal security requirements.
+
+The system serves the following functions:
+- Demonstrate segmented cloud network architecture with enforced boundary protection
+- Implement and document least-privilege identity and access management
+- Provide a platform for continuous monitoring using AWS-native security services
+- Produce RMF-aligned documentation artifacts including SSPs, POA&Ms, and SARs
+
+### 4.2 System Users
+
+| User Type | Access Level | Authentication Method |
+|-----------|-------------|----------------------|
+| System Administrator | Full administrative access via IAM | IAM role; SSM Session Manager |
+| Read-Only Reviewer | Read-only IAM policy | IAM role; AWS Console |
+
+### 4.3 System Dependencies
+
+| Dependency | Type | Description |
+|------------|------|-------------|
+| AWS IAM | Platform Service | Identity and access management |
+| AWS Systems Manager | Platform Service | Remote access and patch management |
+| AWS CloudTrail | Platform Service | API audit logging |
+| AWS GuardDuty | Platform Service | Threat detection |
+| AWS Security Hub | Platform Service | Security findings aggregation |
+| AWS Inspector | Platform Service | Vulnerability assessment |
+
+---
+
+## 5. System Environment and Architecture
+
+### 5.1 Network Architecture
+
+The system operates within a dedicated AWS VPC (10.0.0.0/16) in the us-east-1 region. The network is segmented into public and private subnets with enforced routing boundaries.
+
+```
+Internet
+    │
+    ▼
+Internet Gateway
+    │
+    ▼
+Public Subnet (10.0.1.0/24)     ← ALB / Future public-facing resources
+    │
+    │  (No direct path to private subnet — Security Group controlled)
+    │
+Private Subnet (10.0.2.0/24)    ← EC2 compute resources
+    │
+    ▼
+SSM VPC Endpoint                ← Remote access without internet exposure
+```
+
+### 5.2 Authorization Boundary
+
+The authorization boundary encompasses all AWS resources provisioned within the defined VPC, including:
+- All EC2 instances and associated EBS volumes
+- All VPC networking components (subnets, route tables, security groups, IGW)
+- All IAM roles and policies associated with the system
+- All logging and monitoring services (CloudTrail, GuardDuty, Security Hub, Inspector, Config)
+- All S3 buckets used for log storage
+
+AWS platform-level infrastructure (hypervisor, physical hardware, global network) is outside the authorization boundary and is covered under the AWS FedRAMP authorization.
+
+### 5.3 Hardware and Software Inventory
+
+| Component | Type | Description | NIST CM-8 Tag |
+|-----------|------|-------------|---------------|
+| EC2 Instance (t2.micro) | Compute | Amazon Linux 2; private subnet | CM-8 |
+| EBS Root Volume (encrypted) | Storage | 8GB gp2; AES-256 encryption | SC-28 |
+| VPC (10.0.0.0/16) | Network | Isolated virtual network | SC-7 |
+| Public Subnet | Network | 10.0.1.0/24; internet-accessible | SC-7 |
+| Private Subnet | Network | 10.0.2.0/24; no internet route | SC-7 |
+| Internet Gateway | Network | VPC internet boundary | SC-7 |
+| IAM Role (SSM) | Identity | Least-privilege SSM access role | AC-6 |
+| CloudTrail (planned) | Logging | Account-wide API audit trail | AU-2 |
+| GuardDuty (planned) | Monitoring | Threat detection service | SI-3 |
+| Security Hub (planned) | Monitoring | Findings aggregation | CA-7 |
+| Inspector (planned) | Assessment | Vulnerability scanning | RA-5 |
+
+---
+
+## 6. System Interconnections
+
+| Connected System | Direction | Data Exchanged | Authorization |
+|-----------------|-----------|----------------|---------------|
+| AWS Systems Manager | Outbound | Session control traffic | IAM role policy |
+| AWS CloudTrail S3 Bucket | Outbound | API audit logs | CloudTrail service policy |
+| AWS Security Hub | Inbound | Security findings | Security Hub service role |
+
+No external system interconnections exist outside the AWS account boundary. All service-to-service communication occurs within the AWS control plane using IAM-authorized service roles.
+
+---
+
+## 7. Laws, Regulations, and Policies
+
+The following laws, regulations, and policies are applicable to this system:
+
+| Document | Applicability |
+|----------|--------------|
+| NIST SP 800-53 Rev 5 | Primary security control framework |
+| NIST SP 800-37 Rev 2 | RMF process guidance |
+| NIST SP 800-18 | SSP development guidance |
+| FIPS 199 | Security categorization |
+| FIPS 200 | Minimum security requirements |
+| DoD Instruction 8510.01 | RMF for DoD IT |
+| DoD 8570.01-M / 8140 | IA workforce qualifications |
+| DISA STIGs | OS and application hardening benchmarks |
+
+---
+
+## 8. Security Control Implementation Summary
+
+The following table summarizes the implementation status of selected NIST 800-53 Moderate baseline controls. Full implementation statements are provided in `nist-control-mapping.md`.
+
+| Control ID | Control Name | Implementation Status | Method |
+|------------|-------------|----------------------|--------|
+| AC-2 | Account Management | ⬜ Planned | IAM role-based; no standing accounts |
+| AC-3 | Access Enforcement | ✅ Implemented | IAM role; instance profile |
+| AC-4 | Information Flow Enforcement | ✅ Implemented | VPC; Security Groups; route tables |
+| AC-6 | Least Privilege | ✅ Implemented | Scoped SSM-only IAM policy |
+| AC-17 | Remote Access | ✅ Implemented | SSM Session Manager; no SSH |
+| AU-2 | Event Logging | ⬜ Planned | CloudTrail; VPC Flow Logs |
+| AU-3 | Content of Audit Records | ⬜ Planned | CloudTrail; VPC Flow Logs |
+| AU-9 | Protection of Audit Information | ⬜ Planned | Encrypted S3; bucket policy |
+| CM-2 | Baseline Configuration | ✅ Implemented | Terraform IaC; Git version control |
+| CM-6 | Configuration Settings | 🔄 In Progress | STIG-aligned; IMDSv2; EBS encryption |
+| CM-7 | Least Functionality | 🔄 In Progress | No SSH; minimal services |
+| CM-8 | Component Inventory | ✅ Implemented | Resource tagging; AWS Config |
+| IA-2 | Identification and Authentication | ✅ Implemented | IAM; SSM |
+| IA-5 | Authenticator Management | ✅ Implemented | No SSH keys; temporary credentials |
+| RA-5 | Vulnerability Scanning | ⬜ Planned | AWS Inspector |
+| SC-7 | Boundary Protection | ✅ Implemented | VPC; subnets; IGW; route tables |
+| SC-8 | Transmission Confidentiality | ⬜ Planned | TLS; ALB HTTPS enforcement |
+| SC-28 | Protection of Information at Rest | ✅ Implemented | EBS encryption; KMS |
+| SI-3 | Malicious Code Protection | ⬜ Planned | GuardDuty |
+| SI-4 | System Monitoring | ⬜ Planned | CloudTrail; GuardDuty; Security Hub |
+
+---
+
+## 9. Minimum Security Controls
+
+### 9.1 Access Control (AC)
+
+**AC-3 — Access Enforcement**
+
+Access to all EC2 compute resources is enforced through IAM role-based access control. An IAM role with a scoped least-privilege policy is attached to the EC2 instance profile, granting only the permissions required for Systems Manager Session Manager connectivity. No additional IAM permissions are granted to instance roles. All access enforcement configurations are version-controlled in Terraform.
+
+**AC-6 — Least Privilege**
+
+The IAM policy attached to the EC2 instance role is explicitly scoped to SSM-required actions only: `ssm:StartSession`, `ssmmessages:CreateControlChannel`, `ssmmessages:CreateDataChannel`, `ssmmessages:OpenControlChannel`, `ssmmessages:OpenDataChannel`, and `ec2messages:*`. No `AdministratorAccess` or broad AWS managed policies are attached. The principle of least privilege is enforced by policy design, not by convention.
+
+**AC-17 — Remote Access**
+
+Remote access to EC2 instances is provided exclusively through AWS Systems Manager Session Manager. No SSH key pairs are generated, stored, or associated with any instance. No inbound port 22 rules exist in any Security Group. Session Manager provides encrypted, IAM-authenticated, and auditable remote access without exposing network attack surface.
+
+---
+
+### 9.2 Configuration Management (CM)
+
+**CM-2 — Baseline Configuration**
+
+The authoritative baseline configuration for all AWS resources is defined as Terraform Infrastructure as Code. All resource configurations — VPC, subnets, route tables, IAM roles, EC2 instances — are defined in `.tf` files and stored in version control. Changes to the environment are made exclusively through Terraform plan/apply workflows, ensuring the codebase reflects the current deployed state at all times.
+
+**CM-8 — Information System Component Inventory**
+
+All Terraform-provisioned resources are tagged with a consistent schema: `Environment`, `Project`, `ManagedBy`, and `NISTControl`. Tags directly map each resource to its associated NIST 800-53 control family. The tagging schema enables automated inventory queries through AWS Config and AWS Tag Editor, supporting continuous inventory accuracy without manual tracking.
+
+---
+
+### 9.3 System and Communications Protection (SC)
+
+**SC-7 — Boundary Protection**
+
+Network boundary protection is implemented through a layered VPC architecture. The Internet Gateway defines the external boundary. Separate route tables for public and private subnets enforce traffic flow — private subnet resources have no route to the Internet Gateway. Security Groups provide stateful instance-level boundary enforcement, permitting only explicitly authorized traffic. No private subnet resources are directly reachable from the internet.
+
+**SC-28 — Protection of Information at Rest**
+
+EBS root volumes on all EC2 instances are encrypted using AWS-managed KMS keys (aws/ebs). Encryption is enforced at the Terraform resource level via `encrypted = true` on the root block device configuration. An AWS Config managed rule (`encrypted-volumes`) will be implemented to continuously detect and alert on any unencrypted EBS volumes within the account.
+
+---
+
+## 10. POA&M Summary
+
+The Plan of Action and Milestones (POA&M) identifies open security findings and planned remediation activities. This summary reflects the current lab state.
+
+| POA&M ID | Finding | Severity | Control | Remediation Plan | Target Date |
+|----------|---------|----------|---------|-----------------|-------------|
+| POA-001 | CloudTrail not yet enabled | Moderate | AU-2 | Enable CloudTrail in Phase 4; configure S3 log bucket | Phase 4 |
+| POA-002 | GuardDuty not yet enabled | Moderate | SI-3 | Enable GuardDuty in Phase 4; integrate with Security Hub | Phase 4 |
+| POA-003 | VPC Flow Logs not yet enabled | Moderate | AU-2 | Enable Flow Logs in Phase 4; configure S3 retention | Phase 4 |
+| POA-004 | Inspector not yet enabled | Moderate | RA-5 | Enable Inspector in Phase 4; configure findings export | Phase 4 |
+| POA-005 | Security Hub not yet enabled | Moderate | CA-7 | Enable Security Hub in Phase 4; enable NIST 800-53 standard | Phase 4 |
+| POA-006 | OS-level STIG hardening incomplete | Low | CM-6 | Apply STIG-aligned configurations via automation in Phase 2 | Phase 2 |
+| POA-007 | No data-in-transit encryption (ALB/TLS) | Moderate | SC-8 | Implement ALB with HTTPS enforcement in Phase 3 | Phase 3 |
+| POA-008 | No backup/recovery configuration | Low | CP-9 | Configure AWS Backup in Phase 3 | Phase 3 |
+
+---
+
+*This SSP sample is a living document updated as lab phases are completed. Control implementation status and POA&M entries are updated to reflect the current state of the environment.*
